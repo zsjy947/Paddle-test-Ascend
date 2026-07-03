@@ -1,0 +1,45 @@
+services:
+  paddle-npu:
+    image: paddle-npu-ocr:latest
+    container_name: paddle-npu-dev
+    privileged: true
+    network_mode: host
+    shm_size: "128G"
+    working_dir: /work
+    volumes:
+      - ${HOME}/paddle:/app/paddle
+      - /data1/models:/app/models
+      - /usr/local/Ascend/driver:/usr/local/Ascend/driver
+      - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
+      - /usr/local/dcmi:/usr/local/dcmi
+    environment:
+      - ASCEND_RT_VISIBLE_DEVICES=3,4,5,6
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+  vllm-ascend:
+    image: quay.io/ascend/vllm-ascend:v0.19.1rc1-openeuler
+    container_name: vllm-ascend
+    privileged: true
+    network_mode: host
+    shm_size: "1g"
+    working_dir: /app
+    devices:
+      - /dev/davinci_manager
+      - /dev/devmm_svm
+      - /dev/hisi_hdc
+    volumes:
+      - /data1/models:/app/models
+      - ${HOME}/paddle:/app/paddle
+      - /usr/local/dcmi:/usr/local/dcmi
+      - /usr/local/Ascend/driver/tools/hccn_tool:/usr/local/Ascend/driver/tools/hccn_tool
+      - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
+      - /usr/local/Ascend/driver/lib64/:/usr/local/Ascend/driver/lib64/
+      - /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info
+      - /etc/ascend_install.info:/etc/ascend_install.info
+    environment:
+      - ASCEND_RT_VISIBLE_DEVICES=3
+    stdin_open: true
+    tty: true
+    command: bash /app/paddle/scripts/start_vllm.sh

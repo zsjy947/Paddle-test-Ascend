@@ -1,11 +1,11 @@
 services:
-  paddle-npu:
+  ppdoc-npu:
     image: paddle-npu-ocr:latest
-    container_name: paddle-npu-dev
+    container_name: ppdoc-dev
     privileged: true
     network_mode: host
     shm_size: "128G"
-    working_dir: /work
+    working_dir: /app
     volumes:
       - ${HOME}/paddle:/app/paddle
       - /data1/models:/app/models

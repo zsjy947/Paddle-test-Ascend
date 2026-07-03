@@ -18,7 +18,7 @@ RUN python -m pip install --no-cache-dir paddlepaddle==3.2.0
 
 
 # 下载并安装 PaddleCustomNPU
-RUN wget -q https://paddle-whl.bj.bcebos.com/stable/npu/paddle-custom-npu/paddle_custom_npu-3.2.0-cp310-cp310-linux_aarch64.whl && \
+RUN wget https://paddle-whl.bj.bcebos.com/stable/npu/paddle-custom-npu/paddle_custom_npu-3.2.0-cp310-cp310-linux_aarch64.whl && \
     pip install --no-cache-dir paddle_custom_npu-3.2.0-cp310-cp310-linux_aarch64.whl && \
     rm paddle_custom_npu-3.2.0-cp310-cp310-linux_aarch64.whl
 

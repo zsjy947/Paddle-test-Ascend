@@ -34,6 +34,7 @@ print("-" * 50)
 pipeline = PaddleOCRVL(
     vl_rec_backend="vllm-server",
     vl_rec_server_url=vl_rec_server_url,
+    vl_rec_api_model_name="PaddleOCR-VL-0.9B",
     layout_detection_model_name="PP-DocLayoutV2",
     layout_detection_model_dir=doclayout_model_path,
     device="npu"

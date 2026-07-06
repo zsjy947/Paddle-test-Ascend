@@ -1,6 +1,6 @@
 services:
   ppdoc-npu:
-    image: paddle-npu-ocr:latest
+    image: paddle-npu-ocr:v1
     container_name: ppdoc-dev
     privileged: true
     network_mode: host

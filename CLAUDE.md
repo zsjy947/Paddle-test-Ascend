@@ -38,6 +38,9 @@ python /app/paddle/test/test_paddleocr.py
 
 # 文档版面分析测试（PP-DocLayoutV2 pipeline）
 python /app/paddle/test/test_ppdoclayout.py
+
+# 批量 PDF 推理（读取 input/pdfs/ 下所有 PDF，输出 JSON 和 Markdown）
+python /app/paddle/scripts/batch_inference_pdfs.py
 ```
 
 环境变量：
@@ -45,3 +48,8 @@ python /app/paddle/test/test_ppdoclayout.py
 - `VLLM_SERVER_URL`: vLLM 服务地址，默认 `http://localhost:8000/v1`
 - `DEMO_IMAGE_URL`: 测试图片 URL
 - `OUTPUT_DIR`: 推理结果输出目录，默认 `/app/paddle/output`
+- `INPUT_PDF_DIR`: 批量推理输入目录，默认 `/app/paddle/input/pdfs`
+
+## 进度记录
+
+详见 [PROGRESS.md](PROGRESS.md)。

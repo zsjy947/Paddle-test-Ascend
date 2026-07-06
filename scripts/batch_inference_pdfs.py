@@ -48,16 +48,28 @@ pipeline = PaddleOCRVL(
 
 for pdf_path in pdf_files:
     basename = os.path.splitext(os.path.basename(pdf_path))[0]
+    pdf_output_dir = os.path.join(output_dir, basename)
+    os.makedirs(pdf_output_dir, exist_ok=True)
+
     print(f"\n处理: {os.path.basename(pdf_path)}")
 
     output = pipeline.predict(pdf_path)
+    pages_res = list(output)
+
+    # 合并跨页表格 + 重建多级标题 + 合并多页结果
+    output = pipeline.restructure_pages(
+        pages_res,
+        merge_tables=True,
+        relevel_titles=True,
+        concatenate_pages=True
+    )
 
     for i, res in enumerate(output):
         suffix = f"_{i}" if len(output) > 1 else ""
-        json_path = os.path.join(output_dir, f"{basename}{suffix}.json")
-        md_path = os.path.join(output_dir, f"{basename}{suffix}.md")
+        json_path = os.path.join(pdf_output_dir, f"{basename}{suffix}.json")
+        md_path = os.path.join(pdf_output_dir, f"{basename}{suffix}.md")
         res.save_to_json(save_path=json_path)
         res.save_to_markdown(save_path=md_path)
-        print(f"  [OK] {os.path.basename(json_path)}, {os.path.basename(md_path)}")
+        print(f"  [OK] -> {basename}/{os.path.basename(json_path)}, {basename}/{os.path.basename(md_path)}")
 
 print("\n全部处理完成")

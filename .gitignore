@@ -2,3 +2,9 @@ __pycache__/
 *.pyc
 output/
 .env
+
+.venv/
+.vscode/
+input/
+output/
+.omo/

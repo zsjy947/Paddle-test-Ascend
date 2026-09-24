@@ -1,6 +1,8 @@
 services:
   docparse-npu:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: docparse-npu:v1
     container_name: docparse-dev
     shm_size: "128G"
@@ -11,7 +13,8 @@ services:
       - /dev/devmm_svm
       - /dev/hisi_hdc
     volumes:
-      - ${HOME}/drawbridge/var/projects/paddle:/app/paddle
+      # 相对路径挂载仓库本身（compose 按项目目录解析，不依赖 HOME 环境变量）
+      - .:/app/paddle
       - /data1/models:/app/models
       - /usr/local/Ascend/driver:/usr/local/Ascend/driver
       - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
@@ -45,7 +48,7 @@ services:
       - "${VLLM_HOST_PORT:-8312}:${VLLM_PORT:-8000}"
     volumes:
       - /data1/models:/app/models
-      - ${HOME}/drawbridge/var/projects/paddle:/app/paddle
+      - .:/app/paddle
       - /usr/local/dcmi:/usr/local/dcmi
       - /usr/local/Ascend/driver/tools/hccn_tool:/usr/local/Ascend/driver/tools/hccn_tool
       - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi

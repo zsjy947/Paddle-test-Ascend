@@ -1,6 +1,6 @@
 """压测：vLLM OCR 并发 QPS / 延迟统计（原 benchmark_paddleocr.py）。容器内运行。
 
-复用 ppdoc.VLMOcrClient（单 client 多线程复用，不再每请求新建连接）。
+复用 docparse.VLMOcrClient（单 client 多线程复用，不再每请求新建连接）。
 """
 
 import os
@@ -8,8 +8,8 @@ import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from ppdoc.client import VLMOcrClient
-from ppdoc.config import Settings
+from docparse.client import VLMOcrClient
+from docparse.config import Settings
 
 CONCURRENCY = int(os.environ.get("BENCH_CONCURRENCY", "10"))
 TOTAL_REQUESTS = int(os.environ.get("BENCH_TOTAL_REQUESTS", "50"))

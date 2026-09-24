@@ -1,0 +1,22 @@
+# 宿主机/轻量运行支持：uv run docparse ... / uv run python test/benchmark.py
+# 仅包含 HTTP API 类命令（ocr/check/benchmark）所需依赖；
+# NPU 推理依赖（paddleocr/paddlepaddle 等）见 requirements.txt，在容器内安装
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "docparse"
+version = "0.2.0"
+description = "Ascend NPU document parsing toolkit (PaddleOCR-VL / PP-DocLayout / PPStructureV3 / seal)"
+requires-python = ">=3.9"
+dependencies = [
+    "openai>=1.0",
+    "PyYAML>=6",
+]
+
+[project.scripts]
+docparse = "docparse.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["docparse"]

@@ -1,7 +1,8 @@
 services:
-  ppdoc-npu:
-    image: paddle-npu-ocr:v1
-    container_name: ppdoc-dev
+  docparse-npu:
+    build: .
+    image: docparse-npu:v1
+    container_name: docparse-dev
     privileged: true
     network_mode: host
     shm_size: "128G"
@@ -21,7 +22,7 @@ services:
     depends_on:
       vllm-ascend:
         condition: service_healthy
-    # 只启动开发容器（不等待 vLLM）时：docker compose up -d --no-deps ppdoc-npu
+    # 只启动开发容器（不等待 vLLM）时：docker compose up -d --no-deps docparse-npu
 
   vllm-ascend:
     image: quay.io/ascend/vllm-ascend:v0.19.1rc1-openeuler

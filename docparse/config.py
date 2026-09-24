@@ -1,7 +1,7 @@
 """集中配置：config.yaml + 环境变量双层覆盖，内置默认值兜底。
 
 优先级：环境变量 > 配置文件 > 内置默认值。
-- 配置文件路径：PPDOC_CONFIG 环境变量指定；缺省依次查找 仓库根/config.yaml、当前目录/config.yaml
+- 配置文件路径：DOCPARSE_CONFIG 环境变量指定；缺省依次查找 仓库根/config.yaml、当前目录/config.yaml
 - 环境变量名与历史版本保持一致（见 _ENV_OVERRIDES），服务器侧既有用法不受影响
 """
 
@@ -9,7 +9,7 @@ import os
 import sys
 from dataclasses import dataclass, field, fields
 
-CONFIG_ENV = "PPDOC_CONFIG"
+CONFIG_ENV = "DOCPARSE_CONFIG"
 
 # 环境变量 → Settings 字段（变量名保持历史兼容）
 _ENV_OVERRIDES = {
@@ -21,7 +21,7 @@ _ENV_OVERRIDES = {
     "VLLM_MODEL_NAME": "vllm_model_name",
     "OUTPUT_DIR": "output_dir",
     "INPUT_PDF_DIR": "input_pdf_dir",
-    "PPDOC_DEVICE": "device",
+    "DOCPARSE_DEVICE": "device",
 }
 
 

@@ -6,7 +6,7 @@ import os
 import time
 from dataclasses import asdict, dataclass, field
 
-from ppdoc import pipelines, postprocess
+from docparse import pipelines, postprocess
 
 
 def collect_pdfs(input_dir: str) -> list:

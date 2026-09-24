@@ -1,12 +1,12 @@
-"""smoke 测试：PP-DocLayoutV2 版面 + vLLM 识别混合管线（原 test_ppdoclayout.py）。容器内运行。
+"""smoke 测试：PP-DocLayoutV2 版面 + vLLM 识别混合管线（原 test_docparselayout.py）。容器内运行。
 
-等价 CLI：python -m ppdoc parse "$DEMO_IMAGE_URL" --engine vl-server --no-restructure
+等价 CLI：python -m docparse parse "$DEMO_IMAGE_URL" --engine vl-server --no-restructure
 """
 
 import os
 
-from ppdoc import pipelines, postprocess
-from ppdoc.config import Settings
+from docparse import pipelines, postprocess
+from docparse.config import Settings
 
 settings = Settings.load()
 errors = settings.validate("vl-server")

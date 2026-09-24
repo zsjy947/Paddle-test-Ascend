@@ -8,7 +8,7 @@ config.yaml 中 engines.<引擎> 段内未被消费的参数会原样透传给 p
 import os
 import sys
 
-from ppdoc.config import Settings
+from docparse.config import Settings
 
 ENGINES = ("vl-server", "structure", "seal")
 

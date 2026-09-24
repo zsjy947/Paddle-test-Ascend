@@ -1,13 +1,13 @@
 """smoke 测试：印章识别独立管线（原 test_seal_recognition.py）。容器内运行。
 
-等价 CLI：python -m ppdoc parse "$SEAL_IMAGE" --engine seal
+等价 CLI：python -m docparse parse "$SEAL_IMAGE" --engine seal
 模型目录（SEAL_DET_MODEL_PATH / SEAL_REC_MODEL_PATH）存在时用本地模型，否则回退库内置默认。
 """
 
 import os
 
-from ppdoc import pipelines
-from ppdoc.config import Settings
+from docparse import pipelines
+from docparse.config import Settings
 
 settings = Settings.load()
 

@@ -2,8 +2,8 @@
 
 import os
 
-from ppdoc.client import VLMOcrClient
-from ppdoc.config import Settings
+from docparse.client import VLMOcrClient
+from docparse.config import Settings
 
 image = os.environ.get(
     "DEMO_IMAGE_URL",

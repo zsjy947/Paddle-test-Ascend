@@ -1,12 +1,12 @@
 """smoke 测试：PPStructureV3 全本地管线（版面+印章，原 test_ppstructure.py）。容器内运行。
 
-等价 CLI：python -m ppdoc parse "$PDF_FILE" --engine structure
+等价 CLI：python -m docparse parse "$PDF_FILE" --engine structure
 """
 
 import os
 
-from ppdoc import pipelines, postprocess
-from ppdoc.config import Settings
+from docparse import pipelines, postprocess
+from docparse.config import Settings
 
 settings = Settings.load()
 errors = settings.validate("structure")

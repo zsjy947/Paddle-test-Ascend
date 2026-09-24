@@ -1,26 +1,26 @@
 """命令行入口：parse / ocr / check。
 
 用法（容器内）:
-    python -m ppdoc parse input/pdfs                     # 批量解析目录（默认 vl-server 引擎）
-    python -m ppdoc parse a.pdf --engine structure       # 单文件，全本地管线
-    python -m ppdoc parse --wait-vllm 600                # 等 vLLM 加载完成再批量
-    python -m ppdoc ocr demo.png --task table            # 直连 vLLM API 识别单图
-    python -m ppdoc check                                # 模型目录 + vLLM 就绪检查
+    python -m docparse parse input/pdfs                     # 批量解析目录（默认 vl-server 引擎）
+    python -m docparse parse a.pdf --engine structure       # 单文件，全本地管线
+    python -m docparse parse --wait-vllm 600                # 等 vLLM 加载完成再批量
+    python -m docparse ocr demo.png --task table            # 直连 vLLM API 识别单图
+    python -m docparse check                                # 模型目录 + vLLM 就绪检查
 """
 
 import argparse
 import os
 
-from ppdoc import pipelines
-from ppdoc.batch import collect_pdfs, process_one, print_summary, run_batch, save_report
-from ppdoc.client import TASKS, VLMOcrClient, check_vllm, wait_vllm
-from ppdoc.config import Settings
-from ppdoc.pipelines import ENGINES
+from docparse import pipelines
+from docparse.batch import collect_pdfs, process_one, print_summary, run_batch, save_report
+from docparse.client import TASKS, VLMOcrClient, check_vllm, wait_vllm
+from docparse.config import Settings
+from docparse.pipelines import ENGINES
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="ppdoc",
+        prog="docparse",
         description="昇腾 NPU 文档解析工具（PaddleOCR-VL / PP-DocLayoutV2 / PPStructureV3 / 印章识别）",
     )
     sub = parser.add_subparsers(dest="command", required=True)

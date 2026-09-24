@@ -30,7 +30,7 @@ RUN python -m pip install --no-cache-dir -r /tmp/requirements.txt
 RUN python -m pip install --no-cache-dir numpy==1.26.4 && \
     python -m pip install --no-cache-dir opencv-python==3.4.18.65
 
-# /app/paddle 挂载仓库代码，ppdoc 包直接 import，无需 pip install
+# /app/paddle 挂载仓库代码，docparse 包直接 import，无需 pip install
 ENV PYTHONPATH=/app/paddle
 
 WORKDIR /app

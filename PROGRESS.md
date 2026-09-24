@@ -1,5 +1,15 @@
 # 进度记录
 
+## 2026-09-24（三）
+
+- 命名统一：包/CLI `ppdoc` → `docparse`（文档解析，更直白）
+  - 镜像 `paddle-npu-ocr:v1` → `docparse-npu:v1`；compose 服务 `ppdoc-npu` → `docparse-npu`、容器 `ppdoc-dev` → `docparse-dev`（NPU 映射未动）
+  - compose 增加 `build` 配置，可直接 `docker compose build` / `docker compose up -d --build`
+  - 环境变量 `PPDOC_CONFIG`/`PPDOC_DEVICE` → `DOCPARSE_CONFIG`/`DOCPARSE_DEVICE`（模型路径类变量名保持不变）
+- 新增 `pyproject.toml`：宿主机 `uv run docparse ocr|check` / `uv run python test/benchmark.py`
+  开箱即用（仅轻量依赖 openai/PyYAML）；明确 parse 推理必须容器内
+- README 新增「完整验收流程」章节：部署启动 → 容器内推理验收（check/ocr/parse/批量/压测）→ 宿主机验收（uv run）
+
 ## 2026-09-24（二）
 
 - 配置文件化：新增仓库根 `config.yaml`，模型名/路径、vLLM 地址、引擎构造参数集中可调

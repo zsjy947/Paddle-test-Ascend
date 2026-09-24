@@ -21,7 +21,9 @@ services:
       - /usr/local/dcmi:/usr/local/dcmi
       - /etc/ascend_install.info:/etc/ascend_install.info
     environment:
-      - ASCEND_RT_VISIBLE_DEVICES=2
+      # 容器内逻辑编号（只挂 davinci2 → 逻辑表仅一条：物理2→逻辑0），
+      # 写物理号 2 会越界导致可见设备集为空（aclInit 107001 Invalid device ID）
+      - ASCEND_RT_VISIBLE_DEVICES=0
       # bridge 网络下经 compose 服务名访问 vLLM（覆盖 config.yaml 的 localhost 默认值）
       - VLLM_SERVER_URL=http://vllm-ascend:${VLLM_PORT:-8000}/v1
     stdin_open: true
@@ -59,7 +61,8 @@ services:
       - /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info
       - /etc/ascend_install.info:/etc/ascend_install.info
     environment:
-      - ASCEND_RT_VISIBLE_DEVICES=2
+      # 容器内逻辑编号（只挂 davinci2 → 逻辑表仅一条：物理2→逻辑0），含义同 docparse-npu
+      - ASCEND_RT_VISIBLE_DEVICES=0
       # 把 compose 插值结果传入容器，.env / shell 中修改下列变量才能真正生效（start_vllm.sh 读取）
       - VLLM_PORT=${VLLM_PORT:-8000}
       - VLLM_MODEL_PATH=${VLLM_MODEL_PATH:-/app/models/PaddlePaddle/PaddleOCR-VL}

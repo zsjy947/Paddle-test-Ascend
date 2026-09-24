@@ -3,18 +3,24 @@ services:
     build: .
     image: docparse-npu:v1
     container_name: docparse-dev
-    privileged: true
-    network_mode: host
     shm_size: "128G"
     working_dir: /app
+    devices:
+      - /dev/davinci2
+      - /dev/davinci_manager
+      - /dev/devmm_svm
+      - /dev/hisi_hdc
     volumes:
-      - ${HOME}/paddle:/app/paddle
+      - ${HOME}/drawbridge/var/projects/paddle:/app/paddle
       - /data1/models:/app/models
       - /usr/local/Ascend/driver:/usr/local/Ascend/driver
       - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
       - /usr/local/dcmi:/usr/local/dcmi
+      - /etc/ascend_install.info:/etc/ascend_install.info
     environment:
-      - ASCEND_RT_VISIBLE_DEVICES=3,4,5,6
+      - ASCEND_RT_VISIBLE_DEVICES=2
+      # bridge 网络下经 compose 服务名访问 vLLM（覆盖 config.yaml 的 localhost 默认值）
+      - VLLM_SERVER_URL=http://vllm-ascend:${VLLM_PORT:-8000}/v1
     stdin_open: true
     tty: true
     command: /bin/bash
@@ -27,17 +33,19 @@ services:
   vllm-ascend:
     image: quay.io/ascend/vllm-ascend:v0.19.1rc1-openeuler
     container_name: vllm-ascend
-    privileged: true
-    network_mode: host
     shm_size: "1g"
     working_dir: /app
     devices:
+      - /dev/davinci2
       - /dev/davinci_manager
       - /dev/devmm_svm
       - /dev/hisi_hdc
+    ports:
+      # 宿主机 8000 已被占用，固定映射到 8312（容器内仍监听 VLLM_PORT）
+      - "${VLLM_HOST_PORT:-8312}:${VLLM_PORT:-8000}"
     volumes:
       - /data1/models:/app/models
-      - ${HOME}/paddle:/app/paddle
+      - ${HOME}/drawbridge/var/projects/paddle:/app/paddle
       - /usr/local/dcmi:/usr/local/dcmi
       - /usr/local/Ascend/driver/tools/hccn_tool:/usr/local/Ascend/driver/tools/hccn_tool
       - /usr/local/bin/npu-smi:/usr/local/bin/npu-smi
@@ -45,13 +53,18 @@ services:
       - /usr/local/Ascend/driver/version.info:/usr/local/Ascend/driver/version.info
       - /etc/ascend_install.info:/etc/ascend_install.info
     environment:
-      - ASCEND_RT_VISIBLE_DEVICES=3
+      - ASCEND_RT_VISIBLE_DEVICES=2
+      # 把 compose 插值结果传入容器，.env / shell 中修改下列变量才能真正生效（start_vllm.sh 读取）
+      - VLLM_PORT=${VLLM_PORT:-8000}
+      - VLLM_MODEL_PATH=${VLLM_MODEL_PATH:-/app/models/PaddlePaddle/PaddleOCR-VL}
+      - VLLM_MODEL_NAME=${VLLM_MODEL_NAME:-PaddleOCR-VL-0.9B}
+      - VLLM_MAX_BATCHED_TOKENS=${VLLM_MAX_BATCHED_TOKENS:-16384}
     stdin_open: true
     tty: true
     command: bash /app/paddle/scripts/start_vllm.sh
     restart: unless-stopped
     healthcheck:
-      # NPU 上模型加载耗时较长，start_period 给足余量；端口与 start_vllm.sh 的 VLLM_PORT 保持一致
+      # 容器内部探测自身端口，与网络模式无关；NPU 上模型加载耗时较长，start_period 给足余量
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${VLLM_PORT:-8000}/v1/models', timeout=10)"]
       interval: 30s
       timeout: 15s

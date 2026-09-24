@@ -14,7 +14,7 @@
 │   ├─ structure 引擎: PPStructureV3 全本地 + 印章    │
 │   └─ seal 引擎: 印章独立识别     │                   │
 └─────────────────────────────────┼───────────────────┘
-                                  │ OpenAI 兼容 API (:8000)
+                                  │ OpenAI 兼容 API (容器 8000 / 宿主机 8312)
 ┌─────────────────────────────────▼───────────────────┐
 │ vllm-ascend 容器 (PaddleOCR-VL 0.9B, NPU 卡 3)      │
 └─────────────────────────────────────────────────────┘
@@ -25,7 +25,7 @@
 - 昇腾 NPU 910B 硬件
 - CANN 8.0.0
 - Docker + Docker Compose
-- 宿主机 `~/paddle` 为本仓库、`/data1/models` 为模型目录
+- 宿主机 `${HOME}/drawbridge/var/projects/paddle` 为本仓库、`/data1/models` 为模型目录
 - 宿主机轻量运行（可选）：[uv](https://docs.astral.sh/uv/)
 
 ## 配置文件 config.yaml
@@ -115,7 +115,8 @@ python /app/paddle/test/benchmark.py
 
 ```bash
 # 首次运行 uv 会按 pyproject.toml 自动建虚拟环境并安装 docparse（仅轻量依赖 openai/PyYAML）
-export VLLM_SERVER_URL=http://<NPU服务器IP>:8000/v1
+# vLLM 端口映射为宿主机 8312（8000 被占用）
+export VLLM_SERVER_URL=http://<NPU服务器IP>:8312/v1
 
 uv run docparse check                    # 宿主机上模型目录显示"缺失"属正常，只看 vLLM 行
 uv run docparse ocr demo.png --task table
@@ -136,10 +137,11 @@ uv run python test/benchmark.py          # 压测也可以在宿主机跑
 | `PPDOCLAYOUT_MODEL_NAME` | `PP-DocLayoutV2` | 版面模型名（vl-server 引擎） |
 | `SEAL_DET_MODEL_PATH` | `/app/models/PaddlePaddle/PP-OCRv4_server_seal_det` | 印章检测模型路径 |
 | `SEAL_REC_MODEL_PATH` | `/app/models/PaddlePaddle/PP-OCRv4_server_rec` | 印章识别模型路径 |
-| `VLLM_SERVER_URL` | `http://localhost:8000/v1` | vLLM 服务地址 |
+| `VLLM_SERVER_URL` | `http://localhost:8000/v1` | vLLM 服务地址（容器内由 compose 注入服务名地址） |
 | `VLLM_MODEL_NAME` | `PaddleOCR-VL-0.9B` | vLLM served 模型名 |
 | `VLLM_MODEL_PATH` | `/app/models/PaddlePaddle/PaddleOCR-VL` | vLLM 模型路径（start_vllm.sh） |
-| `VLLM_PORT` | `8000` | vLLM 端口（start_vllm.sh + 健康检查） |
+| `VLLM_PORT` | `8000` | vLLM 容器内端口（start_vllm.sh + 健康检查） |
+| `VLLM_HOST_PORT` | `8312` | vLLM 宿主机映射端口（compose ports） |
 | `VLLM_MAX_BATCHED_TOKENS` | `16384` | vLLM 批处理 token 上限（start_vllm.sh） |
 | `OUTPUT_DIR` | `/app/paddle/output` | 推理结果输出目录 |
 | `INPUT_PDF_DIR` | `/app/paddle/input/pdfs` | 批量推理输入目录 |

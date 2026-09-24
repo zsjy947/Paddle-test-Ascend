@@ -1,5 +1,14 @@
 # 进度记录
 
+## 2026-09-24（四）
+
+- compose 安全/网络改造：两服务去掉 `privileged: true` 与 `network_mode: host`
+  - NPU 改为设备挂载（`/dev/davinci2` + manager/devmm_svm/hisi_hdc），`ASCEND_RT_VISIBLE_DEVICES` 统一改为 2 号卡（两服务共用）
+  - vLLM 端口映射 `8312:8000`（宿主机 8000 被占用），新增 `VLLM_HOST_PORT` 变量；容器间经 compose 服务名访问
+  - docparse 容器由 compose 注入 `VLLM_SERVER_URL=http://vllm-ascend:8000/v1`（bridge 网络下 localhost 不再可达）
+  - 项目挂载路径 `${HOME}/paddle` → `${HOME}/drawbridge/var/projects/paddle`
+  - 注：此前 vLLM 独占 3 号卡、docparse 用 3,4,5,6；现两服务共用 2 号卡，显存竞争需关注
+
 ## 2026-09-24（三）
 
 - 命名统一：包/CLI `ppdoc` → `docparse`（文档解析，更直白）

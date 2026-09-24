@@ -51,7 +51,7 @@ paddle/
 
 - 推理/测试脚本与 CLI `parse` 在**容器内运行**，依赖 NPU 硬件（`docparse` 懒加载重依赖，宿主机可 `--help`）
 - 宿主机仅可运行纯 HTTP 命令：`uv run docparse ocr|check`、`uv run python test/benchmark.py`
-- vLLM 服务端口：8000（OpenAI 兼容 API，host 网络宿主机可达）
+- vLLM 端口：容器内 8000、宿主机映射 8312（`VLLM_HOST_PORT`，8000 已被占用）；docparse 容器经 compose 服务名 `vllm-ascend` 访问（compose 已注入 `VLLM_SERVER_URL`）
 - 模型名/路径、引擎参数调整**优先改 `config.yaml`**（优先级：环境变量 > config.yaml > 内置默认值）
 - 环境变量只允许在 `docparse/config.py` 读取，其他模块从 `Settings` 取值
 - pipeline 构造参数集中在 `docparse/pipelines.py`，引擎段未知参数透传给 paddleocr 构造器（新版本参数免改代码）
@@ -59,7 +59,7 @@ paddle/
 ## ANTI-PATTERNS (THIS PROJECT)
 
 - **不要**在宿主机直接运行推理（`parse` 需要 NPU 设备；宿主机只跑 ocr/check/benchmark）
-- **不要**修改 `docker-compose.yml` 中的 NPU 设备映射（`/dev/davinci*`）与卡号分配
+- **不要**修改 `docker-compose.yml` 中的 NPU 设备挂载（`/dev/davinci*`，当前为 2 号卡，两服务共用）与卡号分配
 - **不要**删除 `input/seal_test/` 测试数据
 - **不要**把 numpy/opencv 降级版本并入 `requirements.txt`（需事后覆盖安装，见 Dockerfile 注释）
 - **不要**把 NPU 推理依赖（paddleocr 等）加进 `pyproject.toml`（那是宿主机轻量运行入口）
@@ -88,7 +88,7 @@ python -m docparse parse input/pdfs/xxx.pdf --engine structure
 python -m docparse ocr demo.png --task table
 
 # 宿主机轻量命令（uv 自动按 pyproject.toml 建环境）
-VLLM_SERVER_URL=http://<服务器IP>:8000/v1 uv run docparse check
+VLLM_SERVER_URL=http://<服务器IP>:8312/v1 uv run docparse check
 uv run python test/benchmark.py
 ```
 

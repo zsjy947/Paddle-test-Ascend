@@ -29,8 +29,11 @@ services:
     command: /bin/bash
     restart: unless-stopped
     depends_on:
+      # service_started 而非 service_healthy：drawbridge 部署的 compose up --wait
+      # 超时（约 2 分钟）远小于 vLLM 在 NPU 上的模型加载时间，等 healthy 必然部署失败；
+      # vLLM 就绪由 docparse 客户端自身探测（docparse/client.py wait_vllm）兜底
       vllm-ascend:
-        condition: service_healthy
+        condition: service_started
     # 只启动开发容器（不等待 vLLM）时：docker compose up -d --no-deps docparse-npu
 
   vllm-ascend:
@@ -66,10 +69,5 @@ services:
     tty: true
     command: bash /app/paddle/scripts/start_vllm.sh
     restart: unless-stopped
-    healthcheck:
-      # 容器内部探测自身端口，与网络模式无关；NPU 上模型加载耗时较长，start_period 给足余量
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${VLLM_PORT:-8000}/v1/models', timeout=10)"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 600s
+    # 不定义 healthcheck：compose up --wait 会等服务 healthy，而 vLLM 模型加载
+    # 耗时数分钟，超过 drawbridge 部署等待窗口；就绪探测交给调用方（docparse/client.py）

@@ -17,6 +17,11 @@ services:
     stdin_open: true
     tty: true
     command: /bin/bash
+    restart: unless-stopped
+    depends_on:
+      vllm-ascend:
+        condition: service_healthy
+    # 只启动开发容器（不等待 vLLM）时：docker compose up -d --no-deps ppdoc-npu
 
   vllm-ascend:
     image: quay.io/ascend/vllm-ascend:v0.19.1rc1-openeuler
@@ -43,3 +48,11 @@ services:
     stdin_open: true
     tty: true
     command: bash /app/paddle/scripts/start_vllm.sh
+    restart: unless-stopped
+    healthcheck:
+      # NPU 上模型加载耗时较长，start_period 给足余量；端口与 start_vllm.sh 的 VLLM_PORT 保持一致
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${VLLM_PORT:-8000}/v1/models', timeout=10)"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 600s

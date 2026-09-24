@@ -1,0 +1,5 @@
+# Python 依赖（aarch64 / CANN 8.0 容器环境）
+# 注意：paddlepaddle 与 paddle_custom_npu 是 arch 专用 wheel，在 Dockerfile 内单独安装
+paddleocr[doc-parser]
+safetensors
+openai

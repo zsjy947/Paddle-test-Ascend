@@ -126,6 +126,9 @@ def cmd_ocr(settings: Settings, args) -> int:
 
 def cmd_check(settings: Settings) -> int:
     rc = 0
+    print("== 配置来源 ==")
+    print(f"配置文件: {settings.config_path or '未找到（环境变量 + 内置默认值）'}")
+    print(f"设备: {settings.device}，版面模型名: {settings.layout_model_name}")
     print("== 模型目录 ==")
     for engine in ENGINES:
         dirs = settings.required_model_dirs(engine)
@@ -157,7 +160,7 @@ def cmd_check(settings: Settings) -> int:
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    settings = Settings()
+    settings = Settings.load()
     if args.command == "parse":
         return cmd_parse(settings, args)
     if args.command == "ocr":

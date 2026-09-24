@@ -1,0 +1,47 @@
+# ppdoc 配置文件
+# 优先级：环境变量 > 本文件 > 内置默认值（环境变量清单见 .env.example）
+# 路径均为容器内路径。模型 / paddleocr 版本升级时优先调整本文件，无需改代码。
+
+# 运行设备
+device: npu
+
+# ===== 模型 =====
+# 版面模型名（vl-server 引擎的 layout_detection_model_name，如 PP-DocLayout 升级在此更换）
+layout_model_name: PP-DocLayoutV2
+doclayout_model_dir: /app/models/PaddlePaddle/PP-DocLayoutV2
+seal_det_model_dir: /app/models/PaddlePaddle/PP-OCRv4_server_seal_det
+seal_rec_model_dir: /app/models/PaddlePaddle/PP-OCRv4_server_rec
+
+# ===== vLLM 服务 =====
+# vllm_model_name 需与 scripts/start_vllm.sh 的 VLLM_MODEL_NAME 保持一致
+vllm_server_url: http://localhost:8000/v1
+vllm_model_name: PaddleOCR-VL-0.9B
+
+# ===== 输入输出 =====
+output_dir: /app/paddle/output
+input_pdf_dir: /app/paddle/input/pdfs
+
+# ===== 引擎构造参数 =====
+# 模型路径/名称与 device 由上方顶层配置统一注入（引擎段内同名参数会被忽略并告警）；
+# 其余参数原样透传给 paddleocr 对应 pipeline 构造器，
+# paddleocr 升级新增参数时可直接写在此处启用，无需改代码。
+engines:
+  # PaddleOCRVL：PP-DocLayoutV2 版面本地推理 + vLLM 文字识别
+  vl-server:
+    vl_rec_backend: vllm-server
+
+  # PPStructureV3：全本地（版面 + 印章）
+  structure:
+    # 版面检测标签表（保留 seal 类别）
+    layout_label_list: [text, title, figure, table, seal, footer, header]
+    use_doc_layout: true
+    use_seal_recognition: true
+    use_table_recognition: false
+    use_formula_recognition: false
+    use_doc_orientation_classify: false
+    use_doc_unwarping: false
+
+  # SealRecognition：印章独立识别（模型目录缺失时回退库内置默认模型）
+  seal:
+    use_doc_orientation_classify: false
+    use_doc_unwarping: false

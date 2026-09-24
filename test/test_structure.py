@@ -8,7 +8,7 @@ import os
 from ppdoc import pipelines, postprocess
 from ppdoc.config import Settings
 
-settings = Settings()
+settings = Settings.load()
 errors = settings.validate("structure")
 if errors:
     for e in errors:

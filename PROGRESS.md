@@ -1,5 +1,14 @@
 # 进度记录
 
+## 2026-09-24（二）
+
+- 配置文件化：新增仓库根 `config.yaml`，模型名/路径、vLLM 地址、引擎构造参数集中可调
+  - 加载优先级：环境变量 > config.yaml > 内置默认值；`PPDOC_CONFIG` 可指定配置文件路径
+  - `engines.<引擎>` 段内未知参数原样透传给 paddleocr 构造器——paddleocr 升级新增参数改配置即可启用
+  - 版本敏感项入口：`layout_model_name`、`vllm_model_name`、各模型目录（新增环境变量 `PPDOCLAYOUT_MODEL_NAME`）
+  - `pipelines.py` 参数组装抽为纯函数 `build_pipeline_kwargs`（宿主机可测试）；`check` 显示实际加载的配置来源
+  - 环境变量名与默认值不变；无配置文件时行为与上一版完全一致（代码级兜底默认值）
+
 ## 2026-09-24
 
 - 架构重构：散装脚本重组为 `ppdoc` 核心库 + CLI（`python -m ppdoc parse|ocr|check`）

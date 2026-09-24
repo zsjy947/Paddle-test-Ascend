@@ -29,7 +29,7 @@ def send_request(client: VLMOcrClient, task_type: str) -> dict:
 
 
 def main():
-    settings = Settings()
+    settings = Settings.load()
     client = VLMOcrClient(settings.vllm_server_url, settings.vllm_model_name)
 
     print(f"并发数: {CONCURRENCY}  总请求数: {TOTAL_REQUESTS}")

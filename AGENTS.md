@@ -13,10 +13,11 @@
 paddle/
 ├── Dockerfile              # paddle-npu-ocr 镜像（PaddlePaddle + CustomNPU）
 ├── docker-compose.yml      # ppdoc-npu + vllm-ascend 双服务编排（含 healthcheck）
+├── config.yaml             # ★ 主配置：模型名/路径、引擎构造参数（版本升级入口）
 ├── requirements.txt        # Python 依赖（paddleocr/openai 等）
 ├── ppdoc/                  # ★ 核心库
-│   ├── config.py           # 环境变量集中配置（Settings）
-│   ├── pipelines.py        # 三引擎管线工厂（vl-server/structure/seal）
+│   ├── config.py           # config.yaml + 环境变量加载（Settings，env > file > 默认）
+│   ├── pipelines.py        # 三引擎管线工厂（build_pipeline_kwargs 参数透传）
 │   ├── client.py           # vLLM OpenAI 兼容客户端 + TASKS + 就绪探测
 │   ├── postprocess.py      # restructure_pages 封装 + 统一保存（json+md）
 │   ├── batch.py            # 批量：异常隔离/重试/进度/batch_report.json
@@ -38,9 +39,9 @@ paddle/
 | Task | Location | Notes |
 |------|----------|-------|
 | Docker 构建 | `Dockerfile`, `docker-compose.yml` | NPU 设备映射、模型挂载 |
-| vLLM 启动 | `scripts/start_vllm.sh` | VLLM_MODEL_PATH/VLLM_PORT/VLLM_MODEL_NAME 可覆盖 |
-| 配置/环境变量 | `ppdoc/config.py` | 唯一读取点，勿在别处 os.environ |
-| 管线构造 | `ppdoc/pipelines.py` | create_pipeline(engine, settings) |
+| vLLM 启动 | `scripts/start_vllm.sh` | VLLM_MODEL_PATH/VLLM_PORT/VLLM_MODEL_NAME 等可覆盖 |
+| 配置/模型版本调整 | `config.yaml` + `ppdoc/config.py` | 优先级：环境变量 > config.yaml > 默认 |
+| 管线构造 | `ppdoc/pipelines.py` | build_pipeline_kwargs / create_pipeline；引擎段未知参数透传 |
 | 批量推理 | `ppdoc/batch.py` + CLI `parse` | PDF → JSON + Markdown + batch_report.json |
 | OCR API 调用 | `ppdoc/client.py` | VLMOcrClient / check_vllm / wait_vllm |
 
@@ -48,9 +49,9 @@ paddle/
 
 - 测试脚本与 CLI 在**容器内运行**，依赖 NPU 硬件（`ppdoc` 懒加载重依赖，宿主机可 `--help`）
 - vLLM 服务端口：8000（OpenAI 兼容 API）
-- 模型路径通过环境变量配置，默认 `/app/models/PaddlePaddle/`；完整清单见 `.env.example`
+- 模型名/路径、引擎参数调整**优先改 `config.yaml`**（优先级：环境变量 > config.yaml > 内置默认值）
 - 环境变量只允许在 `ppdoc/config.py` 读取，其他模块从 `Settings` 取值
-- pipeline 构造参数集中在 `ppdoc/pipelines.py`，不在调用方散落
+- pipeline 构造参数集中在 `ppdoc/pipelines.py`，引擎段未知参数透传给 paddleocr 构造器（新版本参数免改代码）
 
 ## ANTI-PATTERNS (THIS PROJECT)
 
@@ -89,13 +90,16 @@ python /app/paddle/test/test_vl_server.py
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
+| `PPDOC_CONFIG` | 仓库根 config.yaml | 配置文件路径 |
 | `PPDOCLAYOUT_MODEL_PATH` | `/app/models/PaddlePaddle/PP-DocLayoutV2` | 版面分析模型路径 |
+| `PPDOCLAYOUT_MODEL_NAME` | `PP-DocLayoutV2` | 版面模型名（vl-server 引擎） |
 | `SEAL_DET_MODEL_PATH` | `/app/models/PaddlePaddle/PP-OCRv4_server_seal_det` | 印章检测模型路径 |
 | `SEAL_REC_MODEL_PATH` | `/app/models/PaddlePaddle/PP-OCRv4_server_rec` | 印章识别模型路径 |
 | `VLLM_SERVER_URL` | `http://localhost:8000/v1` | vLLM 服务地址 |
 | `VLLM_MODEL_NAME` | `PaddleOCR-VL-0.9B` | vLLM served 模型名 |
 | `VLLM_MODEL_PATH` | `/app/models/PaddlePaddle/PaddleOCR-VL` | vLLM 模型路径（start_vllm.sh） |
 | `VLLM_PORT` | `8000` | vLLM 端口 |
+| `VLLM_MAX_BATCHED_TOKENS` | `16384` | vLLM 批处理 token 上限（start_vllm.sh） |
 | `OUTPUT_DIR` | `/app/paddle/output` | 推理结果输出目录 |
 | `INPUT_PDF_DIR` | `/app/paddle/input/pdfs` | 批量推理输入目录 |
 | `PPDOC_DEVICE` | `npu` | 推理设备 |

@@ -10,7 +10,7 @@ image = os.environ.get(
     "https://ofasys-multimodal-wlcb-3-toshanghai.oss-accelerate.aliyuncs.com/wpf272043/keepme/image/receipt.png",
 )
 
-settings = Settings()
+settings = Settings.load()
 print(f"vLLM 地址: {settings.vllm_server_url}")
 print(f"模型: {settings.vllm_model_name}")
 print(f"测试图片: {image}")

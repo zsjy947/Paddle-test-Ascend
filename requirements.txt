@@ -3,3 +3,4 @@
 paddleocr[doc-parser]
 safetensors
 openai
+PyYAML

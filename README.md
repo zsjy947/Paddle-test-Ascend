@@ -96,19 +96,39 @@ python /app/paddle/test/benchmark.py
 文档引擎默认开启 `restructure_pages`（跨页表格合并、多级标题重建、多页拼接），
 `--no-restructure` 可关闭。
 
+## 配置文件 config.yaml
+
+模型名、模型路径、引擎参数集中在 [config.yaml](config.yaml)，调整**优先改配置文件**，无需改代码。
+
+优先级：**环境变量 > config.yaml > 内置默认值**。配置文件路径可用 `PPDOC_CONFIG` 指定，
+缺省依次查找 仓库根/config.yaml、当前目录/config.yaml（`python -m ppdoc check` 会显示实际加载来源）。
+
+模型 / paddleocr 版本升级的常见调整：
+
+| 场景 | 改法 |
+|---|---|
+| 版面模型升级（如 PP-DocLayoutV2 → V3） | `layout_model_name` + `doclayout_model_dir` |
+| PaddleOCR-VL 换新模型 | `vllm_model_name` + `start_vllm.sh` 的 `VLLM_MODEL_NAME`/`VLLM_MODEL_PATH` |
+| 印章模型更换 | `seal_det_model_dir` / `seal_rec_model_dir` |
+| 开关表格/公式识别等 | `engines.structure.*` 对应开关 |
+| paddleocr 升级引入**新**构造参数 | 直接写在 `engines.<引擎>` 段内，原样透传给构造器 |
+
 ## 环境变量
 
 全部有默认值，完整清单见 [.env.example](.env.example)。
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
+| `PPDOC_CONFIG` | 仓库根 config.yaml | 配置文件路径 |
 | `PPDOCLAYOUT_MODEL_PATH` | `/app/models/PaddlePaddle/PP-DocLayoutV2` | 版面分析模型路径 |
+| `PPDOCLAYOUT_MODEL_NAME` | `PP-DocLayoutV2` | 版面模型名（vl-server 引擎） |
 | `SEAL_DET_MODEL_PATH` | `/app/models/PaddlePaddle/PP-OCRv4_server_seal_det` | 印章检测模型路径 |
 | `SEAL_REC_MODEL_PATH` | `/app/models/PaddlePaddle/PP-OCRv4_server_rec` | 印章识别模型路径 |
 | `VLLM_SERVER_URL` | `http://localhost:8000/v1` | vLLM 服务地址 |
 | `VLLM_MODEL_NAME` | `PaddleOCR-VL-0.9B` | vLLM served 模型名 |
 | `VLLM_MODEL_PATH` | `/app/models/PaddlePaddle/PaddleOCR-VL` | vLLM 模型路径（start_vllm.sh） |
 | `VLLM_PORT` | `8000` | vLLM 端口（start_vllm.sh + 健康检查） |
+| `VLLM_MAX_BATCHED_TOKENS` | `16384` | vLLM 批处理 token 上限（start_vllm.sh） |
 | `OUTPUT_DIR` | `/app/paddle/output` | 推理结果输出目录 |
 | `INPUT_PDF_DIR` | `/app/paddle/input/pdfs` | 批量推理输入目录 |
 | `PPDOC_DEVICE` | `npu` | 推理设备 |
@@ -119,10 +139,11 @@ python /app/paddle/test/benchmark.py
 .
 ├── Dockerfile              # paddle-npu-ocr 镜像（PaddlePaddle + CustomNPU）
 ├── docker-compose.yml      # ppdoc-npu + vllm-ascend 双服务编排
+├── config.yaml             # ★ 主配置（模型/引擎参数，版本升级入口）
 ├── requirements.txt        # Python 依赖
 ├── ppdoc/                  # ★ 核心库
-│   ├── config.py           # 环境变量集中配置（Settings）
-│   ├── pipelines.py        # 三引擎管线工厂（create_pipeline）
+│   ├── config.py           # config.yaml + 环境变量加载（Settings）
+│   ├── pipelines.py        # 三引擎管线工厂（构造参数可透传）
 │   ├── client.py           # vLLM OpenAI 兼容客户端 + 就绪探测
 │   ├── postprocess.py      # restructure_pages + 统一保存
 │   ├── batch.py            # 批量：异常隔离/重试/进度/汇总报告

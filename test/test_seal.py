@@ -9,7 +9,7 @@ import os
 from ppdoc import pipelines
 from ppdoc.config import Settings
 
-settings = Settings()
+settings = Settings.load()
 
 seal_image = os.environ.get(
     "SEAL_IMAGE",
